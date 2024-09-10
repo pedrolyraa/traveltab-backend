@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://pedrolucenalyra:pepepeuuu2814@traveltabcluster.7tj7n.mongodb.net/
+      database: traveltabdb
+
+
+
+#api:
+#  security:
+#    token:
+#      secret: ${JWT_SECRET:my_secret_key}
