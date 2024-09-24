@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.example.traveltrab_backend_mongo.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ public class TokenService {
 
 
 
-    @Value("${api.security.token.secret")
+    @Value("${api.security.token.secret}")
     private String secret;
     public String generateToken(Users user){
         try {

@@ -1,6 +1,6 @@
-package com.example.traveltrab_backend_mongo.repository;
+package com.example.traveltrab_backend_mongo.entities.users.repository;
 
-import com.example.traveltrab_backend_mongo.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

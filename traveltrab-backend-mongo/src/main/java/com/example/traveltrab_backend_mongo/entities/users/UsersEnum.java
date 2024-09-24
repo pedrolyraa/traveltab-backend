@@ -1,4 +1,4 @@
-package com.example.traveltrab_backend_mongo.users;
+package com.example.traveltrab_backend_mongo.entities.users;
 
 public enum UsersEnum {
 

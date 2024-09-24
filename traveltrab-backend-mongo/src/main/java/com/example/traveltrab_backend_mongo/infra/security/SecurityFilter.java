@@ -1,7 +1,7 @@
 package com.example.traveltrab_backend_mongo.infra.security;
 
-import com.example.traveltrab_backend_mongo.repository.UsersRepository;
-import com.example.traveltrab_backend_mongo.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;
+import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

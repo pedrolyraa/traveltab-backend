@@ -4,8 +4,8 @@ import com.example.traveltrab_backend_mongo.DTOS.LoginRequestDTO;
 import com.example.traveltrab_backend_mongo.DTOS.RegisterDTO;
 import com.example.traveltrab_backend_mongo.DTOS.TokenResponseDTO;
 import com.example.traveltrab_backend_mongo.infra.security.TokenService;
-import com.example.traveltrab_backend_mongo.repository.UsersRepository;
-import com.example.traveltrab_backend_mongo.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;
+import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
 
 @RestController
@@ -49,6 +51,12 @@ public class AuthController {
             newUser.setPassword(passwordEncoder.encode(body.password()));
             newUser.setEmail(body.email());
             newUser.setUsername(body.username());
+
+            newUser.setFriendList(new HashSet<>());
+            newUser.setFriendRequests(new HashSet<>());
+
+            newUser.setCurrentDebt(new HashMap<>());
+            newUser.setDebtOwedToMe(new HashMap<>());
             this.repository.save(newUser);
 
             String token = this.tokenService.generateToken(newUser);

@@ -1,7 +1,7 @@
-package com.example.traveltrab_backend_mongo.users.UsersService;
+package com.example.traveltrab_backend_mongo.entities.users.UsersService;
 
-import com.example.traveltrab_backend_mongo.repository.UsersRepository;
-import com.example.traveltrab_backend_mongo.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
