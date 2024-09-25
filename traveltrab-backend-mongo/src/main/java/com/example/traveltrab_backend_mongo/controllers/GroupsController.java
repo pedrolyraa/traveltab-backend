@@ -5,11 +5,14 @@ import com.example.traveltrab_backend_mongo.DTOS.UpdateGroupRequestDTO;
 import com.example.traveltrab_backend_mongo.entities.groups.domain.Groups;
 import com.example.traveltrab_backend_mongo.entities.groups.exception.GroupsException;
 import com.example.traveltrab_backend_mongo.entities.groups.service.GroupsService;
+import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
+import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -19,6 +22,9 @@ public class GroupsController {
 
     @Autowired
     private GroupsService groupsService;
+
+    @Autowired
+    private UsersRepository usersRepository;
 
 
     @PostMapping("/create")
@@ -74,4 +80,22 @@ public class GroupsController {
         }
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Groups>> getGroupsByUserId(@PathVariable String userId) {
+        try {
+            // Verificar se o usuário existe
+            Users user = usersRepository.findById(userId)
+                    .orElseThrow(() -> new GroupsException("Usuário não encontrado com o ID: " + userId));
+
+            // Obter os IDs dos grupos associados ao usuário
+            Set<String> groupIds = user.getGroups();
+
+            // Obter os grupos correspondentes usando os IDs
+            List<Groups> userGroups = groupsService.findGroupsByIds(groupIds);
+
+            return ResponseEntity.ok(userGroups);
+        } catch (GroupsException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }

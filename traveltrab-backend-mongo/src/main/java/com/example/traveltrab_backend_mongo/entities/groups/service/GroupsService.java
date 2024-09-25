@@ -160,5 +160,9 @@ public class GroupsService {
     }
 
 
+    public List<Groups> findGroupsByIds(Set<String> groupIds) {
+        return groupsRepository.findAllById(groupIds);
+    }
+
 
 }

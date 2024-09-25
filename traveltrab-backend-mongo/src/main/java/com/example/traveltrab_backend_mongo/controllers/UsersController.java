@@ -22,6 +22,7 @@ public class UsersController {
         String result = userService.sendFriendRequest(targetEmail);
         return ResponseEntity.ok(result);
     }
+
     //      Users
     //    String id;
     //    String username;
