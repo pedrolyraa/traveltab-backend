@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
@@ -57,6 +58,7 @@ public class AuthController {
 
             newUser.setCurrentDebt(new HashMap<>());
             newUser.setDebtOwedToMe(new HashMap<>());
+            newUser.setGroups(new HashSet<>());
             this.repository.save(newUser);
 
             String token = this.tokenService.generateToken(newUser);

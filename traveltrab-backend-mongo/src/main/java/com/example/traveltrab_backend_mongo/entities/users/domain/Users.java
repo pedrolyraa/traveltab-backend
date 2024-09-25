@@ -29,6 +29,7 @@ public class Users  {
     private Set<String> friendRequests;
     private Map<String, Float> currentDebt;  // Mapeia ID do usuário para o valor da dívida (dever)
     private Map<String, Float> debtOwedToMe;  // Mapeia ID do usuário para o valor que eles me devem (a receber)
+    private Set<String> groups;
 
 }
 

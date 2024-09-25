@@ -1,4 +1,4 @@
-package com.example.traveltrab_backend_mongo.entities.users.UsersService;
+package com.example.traveltrab_backend_mongo.entities.users.service;
 
 import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
 import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;

@@ -2,7 +2,7 @@ package com.example.traveltrab_backend_mongo.controllers;
 
 
 import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;
-import com.example.traveltrab_backend_mongo.entities.users.UsersService.UserService;
+import com.example.traveltrab_backend_mongo.entities.users.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

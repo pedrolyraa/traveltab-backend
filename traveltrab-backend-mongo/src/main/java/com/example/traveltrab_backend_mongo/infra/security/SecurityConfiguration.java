@@ -1,6 +1,6 @@
 package com.example.traveltrab_backend_mongo.infra.security;
 
-import com.example.traveltrab_backend_mongo.entities.users.UsersService.CustomUserDetailsService;
+import com.example.traveltrab_backend_mongo.entities.users.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +35,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/add").permitAll()
                         .requestMatchers(HttpMethod.POST, "/expenses/create").permitAll()
+                        .requestMatchers("/groups/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

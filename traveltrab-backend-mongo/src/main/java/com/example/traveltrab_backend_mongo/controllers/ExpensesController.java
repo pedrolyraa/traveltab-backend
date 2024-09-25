@@ -1,15 +1,15 @@
 package com.example.traveltrab_backend_mongo.controllers;
 
 import com.example.traveltrab_backend_mongo.DTOS.ExpensesDTO;
+import com.example.traveltrab_backend_mongo.DTOS.UpdateExpensesRequestDTO;
 import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
 import com.example.traveltrab_backend_mongo.entities.expenses.service.ExpensesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/expenses")
@@ -32,31 +32,38 @@ public class ExpensesController {
         return ResponseEntity.ok(expense);
     }
 
-    // Endpoint para marcar uma despesa como paga
-//    @PutMapping("/{expenseId}/pay")
-//    public ResponseEntity<Expenses> markExpenseAsPaid(@PathVariable String expenseId) {
-//        Expenses updatedExpense = expensesService.markExpenseAsPaid(expenseId);
-//        return ResponseEntity.ok(updatedExpense);
-//    }
-//
-//    // Endpoint para obter todas as despesas de um usuário
-//    @GetMapping("/user/{userId}")
-//    public ResponseEntity<List<Expenses>> getUserExpenses(@PathVariable String userId) {
-//        List<Expenses> userExpenses = expensesService.getUserExpenses(userId);
-//        return ResponseEntity.ok(userExpenses);
-//    }
-//
-//    // Endpoint para adicionar um usuário a uma despesa existente
-//    @PostMapping("/{expenseId}/add-user")
-//    public ResponseEntity<Expenses> addUserToExpense(
-//            @PathVariable String expenseId,
-//            @RequestBody AddUserToExpenseDTO addUserDTO) {
-//        Expenses updatedExpense = expensesService.addUserToExpense(
-//                expenseId,
-//                addUserDTO.getUserId(),
-//                addUserDTO.getValorInDebt());
-//
-//        return ResponseEntity.ok(updatedExpense);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Expenses> updateExpense(
+            @PathVariable String id,
+            @RequestBody UpdateExpensesRequestDTO updateExpensesRequestDTO) {
+        try {
+            Expenses updatedExpense = expensesService.updateExpense(id, updateExpensesRequestDTO);
+            return ResponseEntity.ok(updatedExpense);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteExpense(@PathVariable String id) {
+        try {
+            expensesService.deleteExpense(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+//    @PostMapping("/add-members/{id}")
+//    public ResponseEntity<Expenses> addMembersToExpense(
+//            @PathVariable String id,
+//            @RequestBody Map<String, Float> newAssignedUsersMap) {
+//        try {
+//            Expenses updatedExpense = expensesService.addMembersToExpense(id, newAssignedUsersMap);
+//            return ResponseEntity.ok(updatedExpense);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(null);
+//        }
 //    }
 
 }
