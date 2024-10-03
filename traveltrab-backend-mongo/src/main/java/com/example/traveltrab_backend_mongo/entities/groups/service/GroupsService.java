@@ -23,16 +23,13 @@ public class GroupsService {
     @Autowired
     private UsersRepository usersRepository;
 
-    // Método para criar ou atualizar um grupo com todos os dados
     public Groups createGroup(String nameGroup, TypeGroup typeGroup, Date startDate, Date endDate, Set<String> groupMembers) {
-        // Verificar o tipo de grupo e validar as datas
         if (typeGroup == TypeGroup.VIAGEM) {
             if (startDate == null || endDate == null) {
                 throw new GroupsException("Grupos do tipo 'VIAGEM' devem conter Datas de começo e fim.");
             }
         }
 
-        // Criar novo grupo
         Groups newGroup = new Groups();
         newGroup.setNameGroup(nameGroup);
         newGroup.setTypeGroup(typeGroup);
@@ -41,10 +38,9 @@ public class GroupsService {
         newGroup.setGroupMembers(groupMembers);
         newGroup.setExpenses(new ArrayList<>());
 
-        // Salvar o grupo no banco de dados
         Groups savedGroup = groupsRepository.save(newGroup);
+        System.out.println("Grupo criado com ID: " + savedGroup.getId());
 
-        // Atualizar cada usuário para adicionar o grupo no campo 'groups'
         for (String userId : groupMembers) {
             Users user = usersRepository.findById(userId)
                     .orElseThrow(() -> new GroupsException("Usuário com ID " + userId + " não encontrado."));
@@ -57,22 +53,17 @@ public class GroupsService {
             userGroups.add(savedGroup.getId());
             user.setGroups(userGroups);
 
-            // Salvar o usuário atualizado
             usersRepository.save(user);
+            System.out.println("Usuário atualizado com novos grupos: " + user.getGroups());
         }
 
         return savedGroup;
     }
 
-
-
-    // Deletar um grupo
     public void deleteGroup(String id) {
-        // Verificar se o grupo existe
         Groups group = groupsRepository.findById(id)
                 .orElseThrow(() -> new GroupsException("Grupo com ID " + id + " não encontrado."));
 
-        // Remover o grupo da lista de grupos de cada membro do grupo
         Set<String> groupMembers = group.getGroupMembers();
         for (String userId : groupMembers) {
             Users user = usersRepository.findById(userId)
@@ -83,28 +74,22 @@ public class GroupsService {
                 userGroups.remove(group.getId());
                 user.setGroups(userGroups);
 
-                // Salvar o usuário atualizado
                 usersRepository.save(user);
             }
         }
 
-        // Deletar o grupo do repositório
         groupsRepository.delete(group);
     }
 
-
-    // Método para atualizar um grupo
     public Groups updateGroup(String id, UpdateGroupRequestDTO updateGroupRequestDTO) {
         Groups group = groupsRepository.findById(id)
                 .orElseThrow(() -> new GroupsException("Grupo com ID " + id + " não encontrado."));
 
-        // Atualiza os campos conforme o DTO
         if (updateGroupRequestDTO.getNameGroup() != null) {
             group.setNameGroup(updateGroupRequestDTO.getNameGroup());
         }
 
         if (updateGroupRequestDTO.getTypeGroup() != null) {
-            // Verificar o tipo de grupo e validar as datas
             if (updateGroupRequestDTO.getTypeGroup() == TypeGroup.VIAGEM) {
                 if (updateGroupRequestDTO.getStartDate() == null || updateGroupRequestDTO.getEndDate() == null) {
                     throw new GroupsException("Grupos do tipo 'VIAGEM' devem conter Datas de começo e fim.");
@@ -124,22 +109,15 @@ public class GroupsService {
         return groupsRepository.save(group);
     }
 
-
-    // Adicionar mais pessoas ao grupo
     public Groups addMembers(String groupId, Set<String> newMembers) {
         Groups group = groupsRepository.findById(groupId)
                 .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
 
-        // Converte a lista de novos membros para um Set
         Set<String> membersSet = new HashSet<>(newMembers);
-
-        // Adiciona os novos membros ao grupo
         group.getGroupMembers().addAll(membersSet);
 
-        // Atualiza o grupo no banco de dados
         Groups updatedGroup = groupsRepository.save(group);
 
-        // Atualiza os usuários com o novo grupo
         for (String userId : membersSet) {
             Users user = usersRepository.findById(userId)
                     .orElseThrow(() -> new GroupsException("Usuário com ID " + userId + " não encontrado."));
@@ -152,17 +130,17 @@ public class GroupsService {
             userGroups.add(updatedGroup.getId());
             user.setGroups(userGroups);
 
-            // Salva o usuário atualizado
             usersRepository.save(user);
+            System.out.println("Usuário atualizado com novos grupos: " + user.getGroups());
         }
 
         return updatedGroup;
     }
 
-
     public List<Groups> findGroupsByIds(Set<String> groupIds) {
-        return groupsRepository.findAllById(groupIds);
+        System.out.println("Group IDs encontrados para o usuário: " + groupIds);
+        List<Groups> foundGroups = groupsRepository.findAllById(groupIds);
+        System.out.println("Grupos encontrados: " + foundGroups);
+        return foundGroups;
     }
-
-
 }

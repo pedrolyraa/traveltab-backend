@@ -26,7 +26,6 @@ public class GroupsController {
     @Autowired
     private UsersRepository usersRepository;
 
-
     @PostMapping("/create")
     public ResponseEntity<Groups> createGroup(@RequestBody GroupsRequestDTO groupRequestDTO) {
         try {
@@ -44,9 +43,7 @@ public class GroupsController {
         }
     }
 
-
-    // Endpoint para atualizar os dados de um grupo
-    @PutMapping ("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Groups> updateGroup(
             @PathVariable String id,
             @RequestBody UpdateGroupRequestDTO updateGroupRequestDTO) {
@@ -58,7 +55,6 @@ public class GroupsController {
         }
     }
 
-
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable String id) {
         try {
@@ -68,7 +64,6 @@ public class GroupsController {
             return ResponseEntity.badRequest().body(null);  // Retorna 400 Bad Request em caso de erro
         }
     }
-
 
     @PutMapping("/addMembers/{id}")
     public ResponseEntity<Groups> addMembers(@PathVariable String id, @RequestBody Set<String> newMembers) {
@@ -92,6 +87,31 @@ public class GroupsController {
 
             // Obter os grupos correspondentes usando os IDs
             List<Groups> userGroups = groupsService.findGroupsByIds(groupIds);
+
+            return ResponseEntity.ok(userGroups);
+        } catch (GroupsException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/byEmail")
+    public ResponseEntity<List<Groups>> getGroupsByUserEmail(@RequestParam String email) {
+        try {
+            // Verificar se o usuário existe com base no email
+            Users user = usersRepository.findByEmail(email)
+                    .orElseThrow(() -> new GroupsException("Usuário não encontrado com o email: " + email));
+
+            // Obter os IDs dos grupos associados ao usuário
+            Set<String> groupIds = user.getGroups();
+
+            // Adicionar log para verificar os IDs dos grupos
+            System.out.println("Group IDs encontrados para o usuário: " + groupIds);
+
+            // Obter os grupos correspondentes usando os IDs
+            List<Groups> userGroups = groupsService.findGroupsByIds(groupIds);
+
+            // Adicionar log para verificar se os grupos foram encontrados
+            System.out.println("Grupos encontrados: " + userGroups);
 
             return ResponseEntity.ok(userGroups);
         } catch (GroupsException e) {
