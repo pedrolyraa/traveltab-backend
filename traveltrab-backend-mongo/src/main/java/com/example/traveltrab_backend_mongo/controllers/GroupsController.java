@@ -118,4 +118,16 @@ public class GroupsController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/detail/{groupId}")
+    public ResponseEntity<Groups> getGroupById(@PathVariable String groupId) {
+        try {
+            Groups group = groupsService.findGroupById(groupId)
+                    .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
+            return ResponseEntity.ok(group);
+        } catch (GroupsException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
 }

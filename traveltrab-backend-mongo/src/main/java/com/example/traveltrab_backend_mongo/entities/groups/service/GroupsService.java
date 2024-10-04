@@ -143,4 +143,9 @@ public class GroupsService {
         System.out.println("Grupos encontrados: " + foundGroups);
         return foundGroups;
     }
+
+    public Optional<Groups> findGroupById(String groupId) {
+        return groupsRepository.findById(groupId);
+    }
+
 }
