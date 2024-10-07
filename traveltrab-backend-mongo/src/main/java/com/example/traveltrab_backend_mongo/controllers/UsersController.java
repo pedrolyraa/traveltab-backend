@@ -42,4 +42,16 @@ public class UsersController {
     public ResponseEntity<?> getUser() {
         return ResponseEntity.ok("Sucesso");
     }
+
+    // Novo endpoint para buscar o usuário pelo ID
+    @GetMapping("/findById/{userId}")
+    public ResponseEntity<?> findUserById(@PathVariable String userId) {
+        Optional<Users> user = repository.findById(userId);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get()); // Retorna o objeto Users encontrado
+        } else {
+            return ResponseEntity.status(404).body("Usuário não encontrado");
+        }
+    }
+
 }

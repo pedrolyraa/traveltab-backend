@@ -2,7 +2,6 @@ package com.example.traveltrab_backend_mongo.entities.groups.service;
 
 import com.example.traveltrab_backend_mongo.DTOS.GroupsRequestDTO;
 import com.example.traveltrab_backend_mongo.DTOS.UpdateGroupRequestDTO;
-import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
 import com.example.traveltrab_backend_mongo.entities.groups.domain.Groups;
 import com.example.traveltrab_backend_mongo.entities.groups.enums.TypeGroup;
 import com.example.traveltrab_backend_mongo.entities.groups.exception.GroupsException;
@@ -39,7 +38,6 @@ public class GroupsService {
         newGroup.setExpenses(new ArrayList<>());
 
         Groups savedGroup = groupsRepository.save(newGroup);
-        System.out.println("Grupo criado com ID: " + savedGroup.getId());
 
         for (String userId : groupMembers) {
             Users user = usersRepository.findById(userId)
@@ -54,7 +52,6 @@ public class GroupsService {
             user.setGroups(userGroups);
 
             usersRepository.save(user);
-            System.out.println("Usuário atualizado com novos grupos: " + user.getGroups());
         }
 
         return savedGroup;
@@ -131,21 +128,40 @@ public class GroupsService {
             user.setGroups(userGroups);
 
             usersRepository.save(user);
-            System.out.println("Usuário atualizado com novos grupos: " + user.getGroups());
+        }
+
+        return updatedGroup;
+    }
+
+    public Groups removeMember(String groupId, String userId) {
+        Groups group = groupsRepository.findById(groupId)
+                .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
+
+        if (!group.getGroupMembers().contains(userId)) {
+            throw new GroupsException("Usuário com ID " + userId + " não está no grupo.");
+        }
+
+        group.getGroupMembers().remove(userId);
+        Groups updatedGroup = groupsRepository.save(group);
+
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new GroupsException("Usuário com ID " + userId + " não encontrado."));
+
+        Set<String> userGroups = user.getGroups();
+        if (userGroups != null) {
+            userGroups.remove(group.getId());
+            user.setGroups(userGroups);
+            usersRepository.save(user);
         }
 
         return updatedGroup;
     }
 
     public List<Groups> findGroupsByIds(Set<String> groupIds) {
-        System.out.println("Group IDs encontrados para o usuário: " + groupIds);
-        List<Groups> foundGroups = groupsRepository.findAllById(groupIds);
-        System.out.println("Grupos encontrados: " + foundGroups);
-        return foundGroups;
+        return groupsRepository.findAllById(groupIds);
     }
 
     public Optional<Groups> findGroupById(String groupId) {
         return groupsRepository.findById(groupId);
     }
-
 }
