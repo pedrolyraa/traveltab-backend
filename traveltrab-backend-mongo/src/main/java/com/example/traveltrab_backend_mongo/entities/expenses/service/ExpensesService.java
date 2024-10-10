@@ -1,6 +1,5 @@
 package com.example.traveltrab_backend_mongo.entities.expenses.service;
 
-
 import com.example.traveltrab_backend_mongo.DTOS.UpdateExpensesRequestDTO;
 import com.example.traveltrab_backend_mongo.entities.expenses.domain.AssignedUserDebt;
 import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
@@ -26,7 +25,12 @@ public class ExpensesService {
     private GroupsRepository groupsRepository;
 
     public Expenses createExpense(String description, Float balance, Map<String, Float> assignedUsersMap, Set<String> assignedGroups, boolean isSplitEvenly) {
-        // Criar nova despesa
+        // Verificar se assignedGroups está nulo
+        if (assignedGroups == null || assignedGroups.isEmpty()) {
+            throw new RuntimeException("Assigned groups cannot be null or empty");
+        }
+
+        // Criação de uma nova despesa
         Expenses newExpense = new Expenses();
         newExpense.setDescription(description);
         newExpense.setBalance(balance);
@@ -55,9 +59,6 @@ public class ExpensesService {
         newExpense.setAssignedUsers(assignedUsers);
 
         Expenses savedExpense = expensesRepository.save(newExpense);
-
-        // Salvar a despesa no banco
-        expensesRepository.save(newExpense);
 
         // Atualizar o currentDebt dos usuários envolvidos
         for (AssignedUserDebt userDebt : assignedUsers) {
@@ -96,8 +97,6 @@ public class ExpensesService {
         return newExpense;
     }
 
-
-
     public void deleteExpense(String expenseId) {
         // Buscar a despesa no banco de dados
         Expenses expense = expensesRepository.findById(expenseId)
@@ -130,8 +129,6 @@ public class ExpensesService {
         expensesRepository.deleteById(expenseId);
     }
 
-
-
     public Expenses updateExpense(String expenseId, UpdateExpensesRequestDTO updateExpenseRequestDTO) {
         // Buscar a despesa no banco de dados
         Expenses expense = expensesRepository.findById(expenseId)
@@ -145,40 +142,4 @@ public class ExpensesService {
         // Salvar as alterações no banco de dados
         return expensesRepository.save(expense);
     }
-
-
-
-//    public Expenses addMembersToExpense(String expenseId, Map<String, Float> newAssignedUsersMap) {
-//        // Buscar a despesa no banco de dados
-//        Expenses expense = expensesRepository.findById(expenseId)
-//                .orElseThrow(() -> new RuntimeException("Despesa não encontrada com ID: " + expenseId));
-//
-//        // Adicionar novos membros à lista de assignedUsers
-//        List<AssignedUserDebt> assignedUsers = expense.getAssignedUsers();
-//        for (Map.Entry<String, Float> entry : newAssignedUsersMap.entrySet()) {
-//            String userId = entry.getKey();
-//            Float debtAmount = entry.getValue();
-//
-//            assignedUsers.add(new AssignedUserDebt(userId, debtAmount));
-//
-//            // Atualizar o currentDebt do novo usuário adicionado
-//            Users user = usersRepository.findById(userId)
-//                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + userId));
-//
-//            Map<String, Float> currentDebt = user.getCurrentDebt();
-//            if (currentDebt == null) {
-//                currentDebt = new HashMap<>();
-//            }
-//            currentDebt.put(expenseId, debtAmount);
-//            user.setCurrentDebt(currentDebt);
-//            usersRepository.save(user); // Salvar o usuário atualizado
-//        }
-//
-//        // Salvar as alterações na despesa
-//        return expensesRepository.save(expense);
-//    }
-
-
-
-
 }
