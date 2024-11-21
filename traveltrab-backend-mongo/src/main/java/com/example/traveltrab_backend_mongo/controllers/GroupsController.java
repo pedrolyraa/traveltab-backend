@@ -46,26 +46,6 @@ public class GroupsController {
         }
     }
 
-
-
-//    @PostMapping("/createTasks")
-//    public ResponseEntity<Tasks> createTask(@RequestBody TasksRequestDTO tasksRequestDTO) {
-//        try {
-//            // Chamar o serviço com os dados do DTO
-//            Tasks tasks = groupsService.createGroup(
-//                    groupRequestDTO.getNameGroup(),
-//                    groupRequestDTO.getTypeGroup(),
-//                    groupRequestDTO.getStartDate(),
-//                    groupRequestDTO.getEndDate(),
-//                    groupRequestDTO.getGroupMembers()
-//            );
-//            return ResponseEntity.ok(group);
-//        } catch (GroupsException e) {
-//            return ResponseEntity.badRequest().body(null);  // Envia erro 400 caso haja falha na criação
-//        }
-//    }
-
-
     @PutMapping("/update/{id}")
     public ResponseEntity<Groups> updateGroup(@PathVariable String id, @RequestBody UpdateGroupRequestDTO updateGroupRequestDTO) {
         try {

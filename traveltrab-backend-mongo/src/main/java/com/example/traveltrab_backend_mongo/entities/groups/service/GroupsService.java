@@ -218,5 +218,9 @@ public class GroupsService {
         // Salva o grupo com a tarefa removida
         return groupsRepository.save(group);
     }
-
+    public Optional<Groups> findGroupById(String groupId) {
+        return groupsRepository.findById(groupId);
+    }
 }
+
+
