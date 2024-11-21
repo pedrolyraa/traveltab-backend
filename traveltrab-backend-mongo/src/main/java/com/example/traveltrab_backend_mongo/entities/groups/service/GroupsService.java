@@ -3,6 +3,7 @@ package com.example.traveltrab_backend_mongo.entities.groups.service;
 import com.example.traveltrab_backend_mongo.DTOS.GroupsRequestDTO;
 import com.example.traveltrab_backend_mongo.DTOS.UpdateGroupRequestDTO;
 import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
+import com.example.traveltrab_backend_mongo.entities.groups.Tasks;
 import com.example.traveltrab_backend_mongo.entities.groups.domain.Groups;
 import com.example.traveltrab_backend_mongo.entities.groups.enums.TypeGroup;
 import com.example.traveltrab_backend_mongo.entities.groups.exception.GroupsException;
@@ -23,7 +24,7 @@ public class GroupsService {
     @Autowired
     private UsersRepository usersRepository;
 
-    public Groups createGroup(String nameGroup, TypeGroup typeGroup, Date startDate, Date endDate, Set<String> groupMembers) {
+    public Groups createGroup(String nameGroup, TypeGroup typeGroup, Date startDate, Date endDate, List<Tasks> tasks, Set<String> groupMembers) {
         if (typeGroup == TypeGroup.VIAGEM) {
             if (startDate == null || endDate == null) {
                 throw new GroupsException("Grupos do tipo 'VIAGEM' devem conter Datas de começo e fim.");
@@ -35,6 +36,7 @@ public class GroupsService {
         newGroup.setTypeGroup(typeGroup);
         newGroup.setStartDate(startDate);
         newGroup.setEndDate(endDate);
+        newGroup.setTasks(new ArrayList<>());
         newGroup.setGroupMembers(groupMembers);
         newGroup.setExpenses(new ArrayList<>());
 
@@ -143,4 +145,58 @@ public class GroupsService {
         System.out.println("Grupos encontrados: " + foundGroups);
         return foundGroups;
     }
+
+
+    public Groups createTask(String groupId, Tasks newTask) {
+        Groups group = groupsRepository.findById(groupId)
+                .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
+
+        // Adiciona a nova tarefa à lista de tarefas do grupo
+        if (group.getTasks() == null) {
+            group.setTasks(new ArrayList<>());
+        }
+        group.getTasks().add(newTask);
+
+        // Salva o grupo com a nova tarefa
+        return groupsRepository.save(group);
+    }
+
+    // Atualiza uma tarefa existente dentro do grupo
+    public Groups updateTask(String groupId, Tasks updatedTask) {
+        Groups group = groupsRepository.findById(groupId)
+                .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
+
+        // Encontra a tarefa existente e a atualiza
+        Optional<Tasks> taskOptional = group.getTasks().stream()
+                .filter(task -> task.getName().equals(updatedTask.getName()))
+                .findFirst();
+
+        if (taskOptional.isPresent()) {
+            Tasks existingTask = taskOptional.get();
+            existingTask.setStartDate(updatedTask.getStartDate());
+            existingTask.setEndDate(updatedTask.getEndDate());
+
+            // Salva o grupo com a tarefa atualizada
+            return groupsRepository.save(group);
+        } else {
+            throw new GroupsException("Tarefa com nome " + updatedTask.getName() + " não encontrada no grupo.");
+        }
+    }
+
+    // Deleta uma tarefa do grupo
+    public Groups deleteTask(String groupId, String taskName) {
+        Groups group = groupsRepository.findById(groupId)
+                .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
+
+        // Remove a tarefa com o nome especificado da lista de tarefas
+        boolean taskRemoved = group.getTasks().removeIf(task -> task.getName().equals(taskName));
+
+        if (!taskRemoved) {
+            throw new GroupsException("Tarefa com nome " + taskName + " não encontrada no grupo.");
+        }
+
+        // Salva o grupo com a tarefa removida
+        return groupsRepository.save(group);
+    }
+
 }

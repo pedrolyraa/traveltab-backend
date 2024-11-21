@@ -19,7 +19,12 @@ public class UsersController {
     @Autowired
     private UserService userService;
 
-    // Endpoint para buscar um usuário pelo e-mail
+    @GetMapping("/totalDebt")
+    public ResponseEntity<Float> getTotalDebt() {
+        Float totalDebt = userService.calculateTotalDebt();
+        return ResponseEntity.ok(totalDebt);
+    }
+
     @GetMapping("/findByEmail")
     public ResponseEntity<?> findUserByEmail(@RequestParam String email) {
         Optional<Users> user = repository.findByEmail(email);

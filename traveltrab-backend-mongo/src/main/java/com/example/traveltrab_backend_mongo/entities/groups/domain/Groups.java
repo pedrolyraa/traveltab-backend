@@ -1,6 +1,7 @@
 package com.example.traveltrab_backend_mongo.entities.groups.domain;
 
 import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
+import com.example.traveltrab_backend_mongo.entities.groups.Tasks;
 import com.example.traveltrab_backend_mongo.entities.groups.enums.TypeGroup;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -24,5 +25,6 @@ public class Groups {
     private TypeGroup typeGroup;       // Usando o Enum TypeGroup
     private Date startDate;
     private Date endDate;
+    private List<Tasks> tasks;
     private List<Expenses> expenses;
 }

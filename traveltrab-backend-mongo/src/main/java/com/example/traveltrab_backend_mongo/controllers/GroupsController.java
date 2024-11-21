@@ -1,7 +1,9 @@
 package com.example.traveltrab_backend_mongo.controllers;
 
 import com.example.traveltrab_backend_mongo.DTOS.GroupsRequestDTO;
+import com.example.traveltrab_backend_mongo.DTOS.TasksRequestDTO;
 import com.example.traveltrab_backend_mongo.DTOS.UpdateGroupRequestDTO;
+import com.example.traveltrab_backend_mongo.entities.groups.Tasks;
 import com.example.traveltrab_backend_mongo.entities.groups.domain.Groups;
 import com.example.traveltrab_backend_mongo.entities.groups.exception.GroupsException;
 import com.example.traveltrab_backend_mongo.entities.groups.service.GroupsService;
@@ -35,6 +37,7 @@ public class GroupsController {
                     groupRequestDTO.getTypeGroup(),
                     groupRequestDTO.getStartDate(),
                     groupRequestDTO.getEndDate(),
+                    groupRequestDTO.getTasks(),
                     groupRequestDTO.getGroupMembers()
             );
             return ResponseEntity.ok(group);
@@ -42,6 +45,26 @@ public class GroupsController {
             return ResponseEntity.badRequest().body(null);  // Envia erro 400 caso haja falha na criação
         }
     }
+
+
+
+//    @PostMapping("/createTasks")
+//    public ResponseEntity<Tasks> createTask(@RequestBody TasksRequestDTO tasksRequestDTO) {
+//        try {
+//            // Chamar o serviço com os dados do DTO
+//            Tasks tasks = groupsService.createGroup(
+//                    groupRequestDTO.getNameGroup(),
+//                    groupRequestDTO.getTypeGroup(),
+//                    groupRequestDTO.getStartDate(),
+//                    groupRequestDTO.getEndDate(),
+//                    groupRequestDTO.getGroupMembers()
+//            );
+//            return ResponseEntity.ok(group);
+//        } catch (GroupsException e) {
+//            return ResponseEntity.badRequest().body(null);  // Envia erro 400 caso haja falha na criação
+//        }
+//    }
+
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Groups> updateGroup(
