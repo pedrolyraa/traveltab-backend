@@ -182,37 +182,47 @@ public class GroupsService {
     }
 
     // Atualiza uma tarefa existente dentro do grupo
-    public Groups updateTask(String groupId, Tasks updatedTask) {
+    // Atualiza uma tarefa existente
+    public Groups updateTask(String groupId, String taskId, Tasks updatedTask) {
+        // Localiza o grupo pelo ID
         Groups group = groupsRepository.findById(groupId)
                 .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
 
-        // Encontra a tarefa existente e a atualiza
-        Optional<Tasks> taskOptional = group.getTasks().stream()
-                .filter(task -> task.getName().equals(updatedTask.getName()))
-                .findFirst();
+        // Localiza a tarefa dentro do grupo pelo ID
+        Tasks task = group.getTasks().stream()
+                .filter(t -> t.getId().equals(taskId))
+                .findFirst()
+                .orElseThrow(() -> new GroupsException("Tarefa com ID " + taskId + " não encontrada no grupo."));
 
-        if (taskOptional.isPresent()) {
-            Tasks existingTask = taskOptional.get();
-            existingTask.setStartDate(updatedTask.getStartDate());
-            existingTask.setEndDate(updatedTask.getEndDate());
-
-            // Salva o grupo com a tarefa atualizada
-            return groupsRepository.save(group);
-        } else {
-            throw new GroupsException("Tarefa com nome " + updatedTask.getName() + " não encontrada no grupo.");
+        // Atualiza os dados da tarefa, mas apenas se o campo for diferente de null
+        if (updatedTask.getName() != null) {
+            task.setName(updatedTask.getName());
         }
+        if (updatedTask.getStartDate() != null) {
+            task.setStartDate(updatedTask.getStartDate());
+        }
+        if (updatedTask.getEndDate() != null) {
+            task.setEndDate(updatedTask.getEndDate());
+        }
+        if (updatedTask.getIsDone() != null) {
+            task.setIsDone(updatedTask.getIsDone());
+        }
+
+        // Salva o grupo com a tarefa atualizada
+        return groupsRepository.save(group);  // Aqui, o grupo é salvo com as tarefas atualizadas
     }
 
-    // Deleta uma tarefa do grupo
-    public Groups deleteTask(String groupId, String taskName) {
+
+
+    public Groups deleteTask(String groupId, String taskId) {
         Groups group = groupsRepository.findById(groupId)
                 .orElseThrow(() -> new GroupsException("Grupo com ID " + groupId + " não encontrado."));
 
-        // Remove a tarefa com o nome especificado da lista de tarefas
-        boolean taskRemoved = group.getTasks().removeIf(task -> task.getName().equals(taskName));
+        // Remove a tarefa com o ID especificado da lista de tarefas
+        boolean taskRemoved = group.getTasks().removeIf(task -> task.getId().equals(taskId));
 
         if (!taskRemoved) {
-            throw new GroupsException("Tarefa com nome " + taskName + " não encontrada no grupo.");
+            throw new GroupsException("Tarefa com ID " + taskId + " não encontrada no grupo.");
         }
 
         // Salva o grupo com a tarefa removida

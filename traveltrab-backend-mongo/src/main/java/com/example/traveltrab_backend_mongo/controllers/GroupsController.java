@@ -11,6 +11,7 @@ import com.example.traveltrab_backend_mongo.entities.users.domain.Users;
 import com.example.traveltrab_backend_mongo.entities.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -128,4 +129,47 @@ public class GroupsController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+
+    //TASKS
+
+    @PostMapping("/{groupId}/tasks")
+    public ResponseEntity<Groups> createTask(
+            @PathVariable String groupId,
+            @RequestBody Tasks newTask) {
+        try {
+            Groups updatedGroup = groupsService.createTask(groupId, newTask);
+            return ResponseEntity.status(HttpStatus.CREATED).body(updatedGroup);
+        } catch (GroupsException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PutMapping("/{groupId}/tasks/{taskId}")
+    public ResponseEntity<Groups> updateTask(
+            @PathVariable String groupId,
+            @PathVariable String taskId,
+            @RequestBody Tasks updatedTask) {
+        try {
+            Groups updatedGroup = groupsService.updateTask(groupId, taskId, updatedTask);
+            return ResponseEntity.ok(updatedGroup);
+        } catch (GroupsException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+
+
+    @DeleteMapping("/{groupId}/tasks/{taskId}")
+    public ResponseEntity<Groups> deleteTask(
+            @PathVariable String groupId,
+            @PathVariable String taskId) {
+        try {
+            Groups updatedGroup = groupsService.deleteTask(groupId, taskId);
+            return ResponseEntity.ok(updatedGroup);
+        } catch (GroupsException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
 }
