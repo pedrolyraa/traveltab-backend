@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/user/totalDebt").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/findById/**").permitAll()  // Nova linha para permitir o acesso a findById
                         .requestMatchers(HttpMethod.GET, "/user/findByEmail").permitAll()  // Permite o acesso sem autenticação
+                        .requestMatchers(HttpMethod.DELETE, "/expenses/delete/**").permitAll() // Adicionado
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

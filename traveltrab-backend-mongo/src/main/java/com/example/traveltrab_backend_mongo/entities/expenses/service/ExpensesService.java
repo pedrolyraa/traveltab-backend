@@ -150,53 +150,48 @@ public class ExpensesService {
         }
 
         // Validar o mapa de usuários atribuídos
-        if (newAssignedUsersMap == null || newAssignedUsersMap.isEmpty()) {
-            throw new RuntimeException("O mapa de usuários atribuídos não pode ser nulo ou vazio.");
+        if (newAssignedUsersMap != null && !newAssignedUsersMap.isEmpty()) {
+            List<AssignedUserDebt> updatedAssignedUsers = new ArrayList<>();
+            if (isSplitEvenly && expense.getBalance() != null) {
+                Float splitAmount = expense.getBalance() / newAssignedUsersMap.size();
+
+                for (String userId : newAssignedUsersMap.keySet()) {
+                    updatedAssignedUsers.add(new AssignedUserDebt(userId, splitAmount));
+                }
+            } else {
+                for (Map.Entry<String, Float> entry : newAssignedUsersMap.entrySet()) {
+                    updatedAssignedUsers.add(new AssignedUserDebt(entry.getKey(), entry.getValue()));
+                }
+            }
+            expense.setAssignedUsers(updatedAssignedUsers);
         }
 
-        // Atualizar as dívidas dos usuários associados
-        List<AssignedUserDebt> updatedAssignedUsers = new ArrayList<>();
-        Float balance = expense.getBalance();
-        if (isSplitEvenly && balance != null) {
-            Float splitAmount = balance / newAssignedUsersMap.size();
+        // Persistir as alterações na coleção `expenses`
+        Expenses updatedExpense = expensesRepository.save(expense);
 
-            for (String userId : newAssignedUsersMap.keySet()) {
-                updatedAssignedUsers.add(new AssignedUserDebt(userId, splitAmount));
-            }
-        } else {
-            for (Map.Entry<String, Float> entry : newAssignedUsersMap.entrySet()) {
-                String userId = entry.getKey();
-                Float debtAmount = entry.getValue();
-                updatedAssignedUsers.add(new AssignedUserDebt(userId, debtAmount));
-            }
+        // Atualizar a despesa na coleção `groups`
+        for (String groupId : expense.getAssignedGroups()) {
+            Groups group = groupsRepository.findById(groupId)
+                    .orElseThrow(() -> new RuntimeException("Grupo não encontrado com ID: " + groupId));
+
+            // Atualizar a despesa correspondente no grupo
+            group.getExpenses().stream()
+                    .filter(groupExpense -> groupExpense.getId().equals(expenseId))
+                    .forEach(groupExpense -> {
+                        groupExpense.setDescription(updatedExpense.getDescription());
+                        groupExpense.setBalance(updatedExpense.getBalance());
+                        groupExpense.setAssignedUsers(updatedExpense.getAssignedUsers());
+                        groupExpense.setPaid(updatedExpense.isPaid());
+                    });
+
+            // Salvar as alterações no grupo
+            groupsRepository.save(group);
         }
 
-        expense.setAssignedUsers(updatedAssignedUsers);
-
-        // Atualizar o currentDebt dos usuários associados
-        for (AssignedUserDebt userDebt : updatedAssignedUsers) {
-            String userId = userDebt.getUserId();
-            Float debtValue = userDebt.getValorInDebt();
-            Users user = usersRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + userId));
-
-            // Atualizar ou criar o mapa de currentDebt
-            Map<String, Float> currentDebt = user.getCurrentDebt();
-            if (currentDebt == null) {
-                currentDebt = new HashMap<>();
-            }
-
-            // Atualizar o valor da dívida para a despesa
-            currentDebt.put(expenseId, debtValue);
-            user.setCurrentDebt(currentDebt);
-
-            // Salvar alterações no usuário
-            usersRepository.save(user);
-        }
-
-        // Salvar alterações na despesa
-        return expensesRepository.save(expense);
+        return updatedExpense;
     }
+
+
 
 
 }

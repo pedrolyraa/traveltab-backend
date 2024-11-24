@@ -7,6 +7,7 @@ import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
 import com.example.traveltrab_backend_mongo.entities.expenses.service.ExpensesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,11 +35,8 @@ public class ExpensesController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Expenses> updateExpense(
-            @PathVariable String id,
-            @RequestBody UpdateExpenseRequestPayload payload) {
+    public ResponseEntity<?> updateExpense(@PathVariable String id, @RequestBody UpdateExpenseRequestPayload payload) {
         try {
-            // Chamar o serviço de atualização passando os novos parâmetros
             Expenses updatedExpense = expensesService.updateExpense(
                     id,
                     payload.getUpdateExpensesRequestDTO(),
@@ -47,9 +45,11 @@ public class ExpensesController {
             );
             return ResponseEntity.ok(updatedExpense);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao atualizar a despesa: " + e.getMessage());
         }
     }
+
+
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable String id) {
