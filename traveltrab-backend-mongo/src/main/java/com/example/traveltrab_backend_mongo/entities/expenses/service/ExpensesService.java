@@ -129,17 +129,74 @@ public class ExpensesService {
         expensesRepository.deleteById(expenseId);
     }
 
-    public Expenses updateExpense(String expenseId, UpdateExpensesRequestDTO updateExpenseRequestDTO) {
+    public Expenses updateExpense(String expenseId, UpdateExpensesRequestDTO updateExpenseRequestDTO, Map<String, Float> newAssignedUsersMap, boolean isSplitEvenly) {
         // Buscar a despesa no banco de dados
         Expenses expense = expensesRepository.findById(expenseId)
                 .orElseThrow(() -> new RuntimeException("Despesa não encontrada com ID: " + expenseId));
 
-        // Atualizar os campos com os valores recebidos no DTO
-        expense.setDescription(updateExpenseRequestDTO.getDescription());
-        expense.setBalance(updateExpenseRequestDTO.getBalance());
-        expense.setPaid(updateExpenseRequestDTO.isPaid());
+        // Atualizar a descrição, se fornecida
+        if (updateExpenseRequestDTO.getDescription() != null) {
+            expense.setDescription(updateExpenseRequestDTO.getDescription());
+        }
 
-        // Salvar as alterações no banco de dados
+        // Atualizar o valor total da despesa, se fornecido
+        if (updateExpenseRequestDTO.getBalance() != null) {
+            expense.setBalance(updateExpenseRequestDTO.getBalance());
+        }
+
+        // Atualizar o status de pagamento, se fornecido
+        if (updateExpenseRequestDTO.getIsPaid() != null) {
+            expense.setPaid(updateExpenseRequestDTO.getIsPaid());
+        }
+
+        // Validar o mapa de usuários atribuídos
+        if (newAssignedUsersMap == null || newAssignedUsersMap.isEmpty()) {
+            throw new RuntimeException("O mapa de usuários atribuídos não pode ser nulo ou vazio.");
+        }
+
+        // Atualizar as dívidas dos usuários associados
+        List<AssignedUserDebt> updatedAssignedUsers = new ArrayList<>();
+        Float balance = expense.getBalance();
+        if (isSplitEvenly && balance != null) {
+            Float splitAmount = balance / newAssignedUsersMap.size();
+
+            for (String userId : newAssignedUsersMap.keySet()) {
+                updatedAssignedUsers.add(new AssignedUserDebt(userId, splitAmount));
+            }
+        } else {
+            for (Map.Entry<String, Float> entry : newAssignedUsersMap.entrySet()) {
+                String userId = entry.getKey();
+                Float debtAmount = entry.getValue();
+                updatedAssignedUsers.add(new AssignedUserDebt(userId, debtAmount));
+            }
+        }
+
+        expense.setAssignedUsers(updatedAssignedUsers);
+
+        // Atualizar o currentDebt dos usuários associados
+        for (AssignedUserDebt userDebt : updatedAssignedUsers) {
+            String userId = userDebt.getUserId();
+            Float debtValue = userDebt.getValorInDebt();
+            Users user = usersRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + userId));
+
+            // Atualizar ou criar o mapa de currentDebt
+            Map<String, Float> currentDebt = user.getCurrentDebt();
+            if (currentDebt == null) {
+                currentDebt = new HashMap<>();
+            }
+
+            // Atualizar o valor da dívida para a despesa
+            currentDebt.put(expenseId, debtValue);
+            user.setCurrentDebt(currentDebt);
+
+            // Salvar alterações no usuário
+            usersRepository.save(user);
+        }
+
+        // Salvar alterações na despesa
         return expensesRepository.save(expense);
     }
+
+
 }

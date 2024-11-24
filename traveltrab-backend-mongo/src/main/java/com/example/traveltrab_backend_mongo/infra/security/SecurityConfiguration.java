@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/user/add").permitAll()
                         .requestMatchers(HttpMethod.POST, "/expenses/create").permitAll()
                         .requestMatchers("/groups/**").permitAll()
+                        .requestMatchers("/expenses/update/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/totalDebt").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/findById/**").permitAll()  // Nova linha para permitir o acesso a findById
                         .requestMatchers(HttpMethod.GET, "/user/findByEmail").permitAll()  // Permite o acesso sem autenticação

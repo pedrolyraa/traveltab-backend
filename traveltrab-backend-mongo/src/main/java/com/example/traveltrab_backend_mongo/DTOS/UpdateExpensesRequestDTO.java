@@ -9,5 +9,5 @@ import lombok.Setter;
 public class UpdateExpensesRequestDTO {
     private String description;
     private Float balance;
-    private boolean isPaid;
+    private Boolean isPaid;
 }

@@ -2,6 +2,7 @@ package com.example.traveltrab_backend_mongo.controllers;
 
 import com.example.traveltrab_backend_mongo.DTOS.ExpensesDTO;
 import com.example.traveltrab_backend_mongo.DTOS.UpdateExpensesRequestDTO;
+import com.example.traveltrab_backend_mongo.entities.expenses.UpdateExpenseRequestPayload;
 import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
 import com.example.traveltrab_backend_mongo.entities.expenses.service.ExpensesService;
 import lombok.RequiredArgsConstructor;
@@ -35,14 +36,21 @@ public class ExpensesController {
     @PutMapping("/update/{id}")
     public ResponseEntity<Expenses> updateExpense(
             @PathVariable String id,
-            @RequestBody UpdateExpensesRequestDTO updateExpensesRequestDTO) {
+            @RequestBody UpdateExpenseRequestPayload payload) {
         try {
-            Expenses updatedExpense = expensesService.updateExpense(id, updateExpensesRequestDTO);
+            // Chamar o serviço de atualização passando os novos parâmetros
+            Expenses updatedExpense = expensesService.updateExpense(
+                    id,
+                    payload.getUpdateExpensesRequestDTO(),
+                    payload.getNewAssignedUsersMap(),
+                    payload.isSplitEvenly()
+            );
             return ResponseEntity.ok(updatedExpense);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable String id) {
         try {
