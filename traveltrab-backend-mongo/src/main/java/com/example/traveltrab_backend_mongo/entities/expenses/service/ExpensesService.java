@@ -40,18 +40,17 @@ public class ExpensesService {
         List<AssignedUserDebt> assignedUsers = new ArrayList<>(); // Usando List para AssignedUserDebt
 
         if (isSplitEvenly) {
-            // Dividir igualmente entre os usuários
             Float splitAmount = balance / assignedUsersMap.size();
-
             for (String userId : assignedUsersMap.keySet()) {
-                assignedUsers.add(new AssignedUserDebt(userId, splitAmount));
+                // Marcando isPaid como false por padrão
+                assignedUsers.add(new AssignedUserDebt(userId, splitAmount, false));
             }
         } else {
-            // Atualizar a lista com valores específicos fornecidos
             for (Map.Entry<String, Float> entry : assignedUsersMap.entrySet()) {
                 String userId = entry.getKey();
                 Float debtAmount = entry.getValue();
-                assignedUsers.add(new AssignedUserDebt(userId, debtAmount));
+                // Marcando isPaid como false por padrão
+                assignedUsers.add(new AssignedUserDebt(userId, debtAmount, false));
             }
         }
 
@@ -154,17 +153,31 @@ public class ExpensesService {
             List<AssignedUserDebt> updatedAssignedUsers = new ArrayList<>();
             if (isSplitEvenly && expense.getBalance() != null) {
                 Float splitAmount = expense.getBalance() / newAssignedUsersMap.size();
-
                 for (String userId : newAssignedUsersMap.keySet()) {
-                    updatedAssignedUsers.add(new AssignedUserDebt(userId, splitAmount));
+                    // Preserve o valor atual de isPaid
+                    boolean currentIsPaid = expense.getAssignedUsers().stream()
+                            .filter(user -> user.getUserId().equals(userId))
+                            .map(AssignedUserDebt::isPaid)
+                            .findFirst()
+                            .orElse(false);
+                    updatedAssignedUsers.add(new AssignedUserDebt(userId, splitAmount, currentIsPaid));
                 }
             } else {
                 for (Map.Entry<String, Float> entry : newAssignedUsersMap.entrySet()) {
-                    updatedAssignedUsers.add(new AssignedUserDebt(entry.getKey(), entry.getValue()));
+                    String userId = entry.getKey();
+                    Float debtAmount = entry.getValue();
+                    // Preserve o valor atual de isPaid
+                    boolean currentIsPaid = expense.getAssignedUsers().stream()
+                            .filter(user -> user.getUserId().equals(userId))
+                            .map(AssignedUserDebt::isPaid)
+                            .findFirst()
+                            .orElse(false);
+                    updatedAssignedUsers.add(new AssignedUserDebt(userId, debtAmount, currentIsPaid));
                 }
             }
             expense.setAssignedUsers(updatedAssignedUsers);
         }
+
 
         // Persistir as alterações na coleção `expenses`
         Expenses updatedExpense = expensesRepository.save(expense);
@@ -180,7 +193,7 @@ public class ExpensesService {
                     .forEach(groupExpense -> {
                         groupExpense.setDescription(updatedExpense.getDescription());
                         groupExpense.setBalance(updatedExpense.getBalance());
-                        groupExpense.setAssignedUsers(updatedExpense.getAssignedUsers());
+                        groupExpense.setAssignedUsers(updatedExpense.getAssignedUsers()); // Sincroniza corretamente
                         groupExpense.setPaid(updatedExpense.isPaid());
                     });
 
@@ -190,6 +203,81 @@ public class ExpensesService {
 
         return updatedExpense;
     }
+
+
+    public Expenses markUserAsPaid(String expenseId, String userId) {
+        System.out.println("Iniciando markUserAsPaid para expenseId: " + expenseId + " e userId: " + userId);
+
+        // Buscar a despesa pelo ID
+        Expenses expense = expensesRepository.findById(expenseId)
+                .orElseThrow(() -> new RuntimeException("Despesa não encontrada com ID: " + expenseId));
+
+        // Atualizar o status de pagamento no usuário específico
+        boolean userFound = false;
+        for (AssignedUserDebt userDebt : expense.getAssignedUsers()) {
+            if (userDebt.getUserId().equals(userId)) {
+                userDebt.setPaid(true);
+                userFound = true;
+                System.out.println("Usuário encontrado e marcado como pago: " + userId);
+            }
+        }
+
+        if (!userFound) {
+            throw new RuntimeException("Usuário com ID " + userId + " não encontrado na despesa " + expenseId);
+        }
+
+        // Persistir as alterações na coleção `expenses`
+        Expenses updatedExpense = expensesRepository.save(expense);
+
+// Atualizar a despesa na coleção `groups`
+        for (String groupId : expense.getAssignedGroups()) {
+            Groups group = groupsRepository.findById(groupId)
+                    .orElseThrow(() -> new RuntimeException("Grupo não encontrado com ID: " + groupId));
+
+            group.getExpenses().stream()
+                    .filter(groupExpense -> groupExpense.getId().equals(expenseId))
+                    .forEach(groupExpense -> {
+                        groupExpense.setDescription(updatedExpense.getDescription());
+                        groupExpense.setBalance(updatedExpense.getBalance());
+                        groupExpense.setAssignedUsers(updatedExpense.getAssignedUsers()); // Sincroniza assignedUsers
+                        groupExpense.setPaid(updatedExpense.isPaid());
+                    });
+
+            groupsRepository.save(group); // Salva o grupo após as alterações
+        }
+
+
+        return updatedExpense;
+    }
+
+
+    public Expenses getExpenseById(String expenseId) {
+        return expensesRepository.findById(expenseId)
+                .orElseThrow(() -> new RuntimeException("Despesa não encontrada com ID: " + expenseId));
+    }
+
+    public Expenses updateUserPaymentStatus(String expenseId, String userId, boolean isPaid) {
+        Expenses expense = expensesRepository.findById(expenseId)
+                .orElseThrow(() -> new RuntimeException("Despesa não encontrada com ID: " + expenseId));
+
+        boolean userFound = false;
+        for (AssignedUserDebt userDebt : expense.getAssignedUsers()) {
+            if (userDebt.getUserId().equals(userId)) {
+                userDebt.setPaid(isPaid); // Atualiza para true ou false
+                userFound = true;
+            }
+        }
+
+        if (!userFound) {
+            throw new RuntimeException("Usuário com ID " + userId + " não encontrado na despesa " + expenseId);
+        }
+
+        return expensesRepository.save(expense);
+    }
+
+
+
+
 
 
 

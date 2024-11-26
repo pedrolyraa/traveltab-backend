@@ -61,6 +61,34 @@ public class ExpensesController {
         }
     }
 
+    @PutMapping("/markPaid/{expenseId}/{userId}")
+    public ResponseEntity<?> markAsPaid(
+            @PathVariable String expenseId,
+            @PathVariable String userId,
+            @RequestBody Map<String, Boolean> payload
+    ) {
+        boolean isPaid = payload.get("isPaid"); // Lê o valor enviado
+        try {
+            Expenses updatedExpense = expensesService.updateUserPaymentStatus(expenseId, userId, isPaid);
+            return ResponseEntity.ok(updatedExpense);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + e.getMessage());
+        }
+    }
+
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getExpenseById(@PathVariable String id) {
+        try {
+            Expenses expense = expensesService.getExpenseById(id);
+            return ResponseEntity.ok(expense);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + e.getMessage());
+        }
+    }
+
+
 
 //    @PostMapping("/add-members/{id}")
 //    public ResponseEntity<Expenses> addMembersToExpense(
