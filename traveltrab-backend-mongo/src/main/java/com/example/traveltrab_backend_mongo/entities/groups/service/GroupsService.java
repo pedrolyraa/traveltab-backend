@@ -2,6 +2,8 @@ package com.example.traveltrab_backend_mongo.entities.groups.service;
 
 import com.example.traveltrab_backend_mongo.DTOS.GroupsRequestDTO;
 import com.example.traveltrab_backend_mongo.DTOS.UpdateGroupRequestDTO;
+import com.example.traveltrab_backend_mongo.entities.expenses.domain.Expenses;
+import com.example.traveltrab_backend_mongo.entities.expenses.service.ExpensesService;
 import com.example.traveltrab_backend_mongo.entities.groups.Tasks;
 import com.example.traveltrab_backend_mongo.entities.groups.domain.Groups;
 import com.example.traveltrab_backend_mongo.entities.groups.enums.TypeGroup;
@@ -22,6 +24,9 @@ public class GroupsService {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private ExpensesService expensesService;
 
     public Groups createGroup(String nameGroup, TypeGroup typeGroup, Date startDate, Date endDate, List<Tasks> tasks, Set<String> groupMembers) {
         if (typeGroup == TypeGroup.VIAGEM) {
@@ -63,6 +68,17 @@ public class GroupsService {
         Groups group = groupsRepository.findById(id)
                 .orElseThrow(() -> new GroupsException("Grupo com ID " + id + " não encontrado."));
 
+        // Fetch all expenses associated with this group
+        List<Expenses> expensesToDelete = group.getExpenses();
+
+        // Delete each expense associated with the group
+        if (expensesToDelete != null && !expensesToDelete.isEmpty()) {
+            for (Expenses expense : expensesToDelete) {
+                expensesService.deleteExpense(expense.getId());
+            }
+        }
+
+        // Remove the group from users' group lists
         Set<String> groupMembers = group.getGroupMembers();
         for (String userId : groupMembers) {
             Users user = usersRepository.findById(userId)
@@ -77,6 +93,7 @@ public class GroupsService {
             }
         }
 
+        // Finally, delete the group
         groupsRepository.delete(group);
     }
 

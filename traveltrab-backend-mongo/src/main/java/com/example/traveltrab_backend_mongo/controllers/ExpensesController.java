@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -85,6 +86,16 @@ public class ExpensesController {
             return ResponseEntity.ok(expense);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getExpensesByUserId(@PathVariable String userId) {
+        try {
+            List<Expenses> userExpenses = expensesService.getExpensesByUserId(userId);
+            return ResponseEntity.ok(userExpenses);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao buscar despesas: " + e.getMessage());
         }
     }
 

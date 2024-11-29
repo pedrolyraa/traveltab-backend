@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/user/findByEmail").permitAll()  // Permite o acesso sem autenticação
                         .requestMatchers(HttpMethod.DELETE, "/expenses/delete/**").permitAll() // Adicionado
                         .requestMatchers(HttpMethod.PUT, "/expenses/markPaid/**").permitAll() // Adicionado
+                        .requestMatchers(HttpMethod.GET, "expenses/user/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
